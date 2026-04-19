@@ -5,7 +5,7 @@ class Images {
 
   Images({
     required this.imageID,
-    required this.imageAlt,
+     required this.imageAlt,
     required this.imageProtraitPath,
   });
 
