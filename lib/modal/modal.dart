@@ -21,3 +21,23 @@ class Images {
     this.imageProtraitPath = '',
   });
 }
+
+class Video {
+  final int id;
+  final String image;
+  final String videoUrl;
+
+  Video({
+    required this.id,
+    required this.image,
+    required this.videoUrl,
+  });
+
+  factory Video.fromJson(Map<String, dynamic> json) {
+    return Video(
+      id: json['id'],
+      image: json['image'],
+      videoUrl: json['video_files'][0]['link'],
+    );
+  }
+}

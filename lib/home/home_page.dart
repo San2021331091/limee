@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:wallpaper/modal/modal.dart';
-import 'package:wallpaper/repo/repository.dart';
+import 'package:wallpaper/image_grid/image_grid.dart';
+import 'package:wallpaper/search/search.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,28 +11,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Repository repository = Repository();
-  ScrollController scrollController = ScrollController();
-  late Future<List<Images>> imagesList;
-  int pageNumber = 1;
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
-  }
-  @override
-  void initState() {
-    imagesList = repository.getImageList(pageNumber: pageNumber);
-    super.initState();
-  }
+  String _query = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 25.0),
-          child: const Row(
+        title: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 30),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
@@ -56,60 +43,37 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        
       ),
-      body: SingleChildScrollView(
-        controller: scrollController,
-        scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-             FutureBuilder(future: imagesList, builder: (context,snapShot){
-              if(snapShot.connectionState == ConnectionState.done){
-               if(snapShot.hasError){
-                return const Center(child: Text("Error Occured"));
-        
-               }
-               return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 5),
-                  child: MasonryGridView.count(
-                   itemCount: snapShot.data?.length, 
-                    crossAxisCount: 2, 
-    
-                  shrinkWrap: true,
-                  mainAxisSpacing: 5,
-                  crossAxisSpacing: 5,
-                  itemBuilder:(context, index){
-                    double height = (index % 10 + 1) * 100;
-                 return GestureDetector(
-                    child: ClipRect(
-                      child: CachedNetworkImage(imageUrl: snapShot.data!
-                      [index].imageProtraitPath,
-                      height: height > 300 ? 300 : height,
-                      fit: BoxFit.cover,
-                      ),
-                    ),
-                  );
-                  }),
-                  ),
-                  
 
-                ],
-               );
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
 
-              }
-              else{
-                return const Center(child: CircularProgressIndicator());
-              }
+          SearchWidget(
+            onChanged: (value) {
+              setState(() {
+                _query = value;
+              });
+            },
+            onSubmitted: (value) {
+              setState(() {
+                _query = value;
+              });
+            },
+            onClear: () {
+              setState(() {
+                _query = "";
+              });
+            },
+          ),
 
-             }
-             
-             
-             )        
-          ],
-        ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: ImageGridWidget(
+              query: _query, 
+            ),
+          ),
+        ],
       ),
     );
   }
