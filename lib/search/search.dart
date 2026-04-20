@@ -36,7 +36,6 @@ class _SearchWidgetState extends State<SearchWidget> {
         setState(() => _hasText = hasText);
       }
 
-      // 👉 DO NOT sanitize aggressively
       widget.onChanged?.call(text);
     });
   }
@@ -47,8 +46,6 @@ class _SearchWidgetState extends State<SearchWidget> {
     _focusNode.dispose();
     super.dispose();
   }
-
-  /// 🧠 Light cleanup ONLY on submit
   String _cleanQuery(String input) {
     return input.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
@@ -101,7 +98,7 @@ class _SearchWidgetState extends State<SearchWidget> {
           // 👇 Outline border styles
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none, // no visible border (clean look)
+            borderSide: BorderSide.none, 
           ),
 
           enabledBorder: OutlineInputBorder(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wallpaper/custom/scroll_behavior.dart';
-import 'package:wallpaper/home/home_page.dart';
+import 'package:wallpaper/splash/splash_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -10,7 +10,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       scrollBehavior: NewScrollBehavior(),
-      home: HomePage(),
+      home: SplashScreen(),
       ); 
   }
 }

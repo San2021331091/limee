@@ -24,20 +24,54 @@ class Images {
 
 class Video {
   final int id;
-  final String image;
   final String videoUrl;
+  final String image;
 
   Video({
     required this.id,
-    required this.image,
     required this.videoUrl,
+    required this.image,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
+    final files = (json['video_files'] as List?) ?? [];
+
+    String url = '';
+
+    // Prefer HD mp4, fall back to any mp4, then anything with a link
+    final hd = files.firstWhere(
+      (f) =>
+          f['quality'] == 'hd' &&
+          f['link'] != null &&
+          f['link'].toString().endsWith('.mp4'),
+      orElse: () => null,
+    );
+
+    if (hd != null) {
+      url = hd['link'];
+    } else {
+      for (final f in files) {
+        final link = f['link']?.toString() ?? '';
+        if (link.endsWith('.mp4')) {
+          url = link;
+          break;
+        }
+      }
+    }
+
     return Video(
-      id: json['id'],
-      image: json['image'],
-      videoUrl: json['video_files'][0]['link'],
+      id: json['id'] ?? 0,
+      videoUrl: url,
+      image: json['image'] ?? '',
     );
   }
+
+  bool get isValid => videoUrl.isNotEmpty && image.isNotEmpty;
+}
+
+class Category {
+  final String name;
+  final String previewUrl;
+
+  Category({required this.name, required this.previewUrl});
 }

@@ -1,16 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:wallpaper/image_preview/image_preview_widget.dart';
 import 'package:wallpaper/modal/modal.dart';
 import 'package:wallpaper/repo/repository.dart';
 
 class ImageGridWidget extends StatefulWidget {
   final String query;
 
-  const ImageGridWidget({
-    super.key,
-    required this.query,
-  });
+  const ImageGridWidget({super.key, required this.query});
 
   @override
   State<ImageGridWidget> createState() => _ImageGridWidgetState();
@@ -31,21 +29,25 @@ class _ImageGridWidgetState extends State<ImageGridWidget> {
     super.initState();
     fetchImages();
 
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent - 200 &&
-          !isLoading &&
-          hasMore) {
-        fetchImages();
-      }
-    });
+    scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+
+    final thresholdReached =
+        scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 300;
+
+    if (thresholdReached && !isLoading && hasMore) {
+      fetchImages();
+    }
   }
 
   @override
   void didUpdateWidget(covariant ImageGridWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // 🔥 When search query changes → reset everything
     if (oldWidget.query != widget.query) {
       resetAndFetch();
     }
@@ -53,28 +55,29 @@ class _ImageGridWidgetState extends State<ImageGridWidget> {
 
   void resetAndFetch() {
     setState(() {
-      images.clear();
+      images = [];
       pageNumber = 1;
       hasMore = true;
+      isLoading = false;
     });
 
     fetchImages();
   }
 
   Future<void> fetchImages() async {
-    if (isLoading) return;
+    if (isLoading || !hasMore) return;
 
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
 
     try {
       List<Images> newImages = [];
 
       if (widget.query.isEmpty) {
-        // 📸 Default feed
         newImages =
             await repository.getImageList(pageNumber: pageNumber);
       } else {
-        // 🔍 Search mode
         newImages = await repository.searchImages(
           query: widget.query,
           pageNumber: pageNumber,
@@ -88,14 +91,19 @@ class _ImageGridWidgetState extends State<ImageGridWidget> {
         images.addAll(newImages);
       }
     } catch (e) {
-      debugPrint("Error: $e");
+      debugPrint("Error fetching images: $e");
     }
 
-    setState(() => isLoading = false);
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
   void dispose() {
+    scrollController.removeListener(_onScroll);
     scrollController.dispose();
     super.dispose();
   }
@@ -104,10 +112,7 @@ class _ImageGridWidgetState extends State<ImageGridWidget> {
   Widget build(BuildContext context) {
     if (images.isEmpty && isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Colors.green,
-          backgroundColor: Colors.red,
-        ),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -123,32 +128,45 @@ class _ImageGridWidgetState extends State<ImageGridWidget> {
     return MasonryGridView.builder(
       controller: scrollController,
       padding: const EdgeInsets.all(5),
-      gridDelegate:
-          const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
       ),
       mainAxisSpacing: 5,
       crossAxisSpacing: 5,
       itemCount: images.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        // 🔵 Loader at bottom
         if (index >= images.length) {
           return const Padding(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(16),
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
         final image = images[index];
 
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: CachedNetworkImage(
-            imageUrl: image.imageProtraitPath,
-            fit: BoxFit.cover,
-            placeholder: (context, url) =>
-                const Center(child: CircularProgressIndicator()),
-            errorWidget: (context, url, error) =>
-                const Icon(Icons.error),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ImagePreviewScreen(image: image),
+              ),
+            );
+          },
+          child: Hero(
+            tag: image.imageProtraitPath,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CachedNetworkImage(
+                imageUrl: image.imageProtraitPath,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.error),
+              ),
+            ),
           ),
         );
       },

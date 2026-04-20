@@ -1,5 +1,5 @@
 name: wallpaper
-description: "A new Flutter project."
+description: "A new Flutter app for live wallpapers."
 publish_to: 'none'
 version: 0.1.0
 
@@ -13,8 +13,14 @@ dependencies:
   cached_network_image: 
   flutter_staggered_grid_view: 
   external_path: 
-  media_scanner:   
-
+  media_scanner:
+  wallpaper_manager_flutter:   
+  path_provider:
+  flutter_launcher_icons:
+  video_thumbnail:
+  video_player:
+  permission_handler: 
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -22,3 +28,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/logo.png
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/logo.png"  
