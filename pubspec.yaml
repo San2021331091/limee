@@ -1,5 +1,5 @@
 name: wallpaper
-description: "A new Flutter app for live wallpapers."
+description: "A new Flutter app for live wallpapers using Pexels API."
 publish_to: 'none'
 version: 0.1.0
 
