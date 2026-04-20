@@ -8,7 +8,7 @@ import 'package:wallpaper/modal/modal.dart';
 
 class Repository {
   final String apiKey =
-      "UFeKvgf6kK9PPkBgNTkuuxWJWG4v67egJRAmXzul7Dcn63Sd7BCWmeOO";
+      Pexels Api Key";
 
   final String baseURL = "https://api.pexels.com/v1/";
   final String videoBaseURL = "https://api.pexels.com/videos/";
