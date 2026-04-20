@@ -74,8 +74,8 @@ environment:
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/your-username/wallpaper-app.git
+```bash[
+git clone https://github.com/San2021331091/limee.git
 ```
 
 2. Navigate to project folder
